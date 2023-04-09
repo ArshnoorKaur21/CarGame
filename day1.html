@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        .hide{
+            display: none;
+        }
+        .car,.enemy{
+            width: 50px;
+            height: 80px;
+            background: red;
+            position: absolute;
+            /* left: 50px; */
+            bottom: 120px;
+            background-image: url('C:\Users\lovin\Downloads\WhatsApp_Image_2022-05-10_at_12.45.06_AM-removebg-preview (1).png');
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+        }
+        /* for making road */
+        .gamearea{
+            width: 400px;
+            height: 100vh;
+            background-color: #2d3436;
+            margin: auto;
+            position: relative;
+            overflow: hidden;
+            border-right: 7px dashed #c8d6e5;
+            border-left: 7px dashed #c8d6e5;
+
+/* isee car road k andr hi milega */
+        }
+        .lines{
+            width: 10px;
+            height: 100px;
+            background: white;
+            position: absolute;
+            margin-left: 195px;
+        }
+        .score{
+            position: absolute;
+            top:15px;
+            left: 40px;
+            background: #10ac84;
+            width: 300px;
+            line-height: 70px;
+            text-align: center;
+            color: white;
+            font-size: 1.5rem;
+            font-family: fantasy;
+            box-shadow: 0px 5px 5px #777;
+
+        }
+        .startpopupbox{
+            position: absolute;
+            background-color: #ee5253;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%,50%);
+            color: white;
+            z-index: 1;
+            text-align: center;
+            border: 1px solid #ff6b6b;
+            padding: 15px;
+            margin: auto;
+            width: 50%;
+            cursor: pointer;
+            font-family: sans-serif;
+            letter-spacing: 5;
+            font-size: 20px;
+            word-spacing: 3;
+            line-height: 25px;
+            text-transform: uppercase;
+            box-shadow: 0 5px 5px #777;
+        }
+        .carGame{
+            width: 100%;
+            height: 100vh;
+            background-image: url('https://cdn.gamedevmarket.net/wp-content/uploads/20191203171120/0d0cdf89d2a8244e09229299a50325e9-1400x788.png');
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+        
+        }
+    </style>
+</head>
+<body>
+    <div class="carGame">
+        <div class="score"></div>
+        <div class="startpopupbox">
+            <p>Press here to start<br>
+                Arrow keys to move<br>
+                If you hit another car you will lose
+            </p>
+        </div>
+        <div class="gamearea">
+            <!-- Hello -->
+        </div>
+    </div>
+    <script>
+        const score=document.querySelector('.score')
+        const startpopupbox=document.querySelector('.startpopupbox')
+        const gamearea=document.querySelector('.gamearea')
+
+        console.log(gamearea)
+
+
+        //means jb main startpopbox pr krungi click then game stat hojegi
+        startpopupbox.addEventListener('click',start)
+
+        document.addEventListener('keydown',keyDown)
+        document.addEventListener('keyup',keyUp)
+
+        let keys={ArrowUp:false,ArrowDown:false,ArrowLeft:false,ArrowRight:false}
+
+        let player={speed:5,score:0}
+
+        function keyDown(e)
+        {
+            //prevent default means js jo by default hme fxnailty provide krta woh hme nhi chhaie
+            e.preventDefault()
+            keys[e.key]=true
+            console.log(e.key)//means jo bhi main key press kri woh yhn aari
+            console.log(keys)
+            //{ArrowUp: true, ArrowDown: true, ArrowLeft: true, ArrowRight: true} main chahti at a time ek direction main jana
+        }
+        function keyUp(e)
+        {
+            //prevent default means js jo by default hme fxnailty provide krta woh hme nhi chhaie
+            //means jb press krra us time us key ko true krdo jaise hi relase krra usee false krdo
+            keys[e.key]=false
+            e.preventDefault()
+            console.log(e.key)
+            console.log(keys)
+        }
+        function isCollide(a,b){
+            //here a is actual car positon and b is enemy car positon
+            aRect=a.getBoundingClientRect()
+            bRect=b.getBoundingClientRect()
+           
+            return !((aRect.bottom<bRect.top)||(aRect.top>bRect.bottom)||(aRect.left>bRect.right)||(aRect.right<bRect.left))
+        }
+
+        function movelines(){
+            let lines=document.querySelectorAll('.lines')
+            lines.forEach(function(item){
+                console.log(item.y)
+                if(item.y>700)
+                {
+                    item.y-=750
+                }
+                item.y+=player.speed
+                item.style.top=item.y+"px"
+            })
+        }
+        function endgame(){
+            player.starts=false
+            startpopupbox.classList.remove('hide')
+            startpopupbox.innerHTML="Game Over <br> your final score is "+player.score+"<br> Press here to restart the game"
+        }
+
+        function moveenemy(car){
+            let enemy=document.querySelectorAll('.enemy')
+            enemy.forEach(function(item){
+
+                if(isCollide(car,item))
+                {
+                    console.log("collison")
+                    endgame()
+                }
+                console.log(item.y)
+                if(item.y>700)
+                {
+                    item.y-=850
+                    item.style.left=Math.floor(Math.random()*350)+"px"
+                }
+                item.y+=player.speed
+                item.style.top=item.y+"px"
+
+            })
+        }
+
+        function gamePlay(){
+            console.log("game started")
+            let car=document.querySelector('.car')
+            let road=gamearea.getBoundingClientRect()
+            console.log(road)
+
+
+            if(player.starts)
+            { 
+                movelines()
+                moveenemy(car)
+
+                if(keys.ArrowUp && player.y>(road.top+70)){player.y-=player.speed}
+                if(keys.ArrowDown && player.y<(road.bottom-70)){player.y+=player.speed}//agr value increase krri the top se car niche ati
+                if(keys.ArrowLeft && player.x>0){player.x-=player.speed}
+                if(keys.ArrowRight && player.x<road.width-50){player.x+=player.speed}
+
+
+                car.style.top=player.y+"px"
+                car.style.left=player.x+"px"
+
+                window.requestAnimationFrame(gamePlay)//baar baar recursively same fxn ko call krra aur animation dikehga
+                console.log(player.score++)
+
+                player.score++
+                let ps=player.score-2
+                score.innerHTML="Score: "+ps
+            
+            }
+        }
+
+        //game start hone pr mujhe continous animation dikhra road wala
+        function start(){
+            // gamearea.classList.remove('hide')//gamearea show hojega jismei hello show hora bt uski jgh cars aani chahie 
+            startpopupbox.classList.add('hide')//popup hide hojega
+            gamearea.innerHTML=""
+
+            player.starts=true
+            player.score=0
+            //here callback fxn gameplay is passed 
+            window.requestAnimationFrame(gamePlay)
+
+            for(i=0;i<5;i++)
+            {
+                    let roadline=document.createElement('div')
+                    roadline.setAttribute('class','lines')
+                    roadline.y=(i*150)
+                    roadline.style.top=(i*150)+"px"
+                    gamearea.appendChild(roadline)
+            }
+
+            let car=document.createElement('div')
+            car.setAttribute('class','car')
+            // car.innerText="hey i am car" //ab mujhe is text k bdle car chahie
+
+            //now add this class named car div inside gamearea
+            gamearea.appendChild(car) 
+
+
+            player.x=car.offsetLeft
+            player.y=car.offsetTop
+            //left aur top se kitna distance hai
+            // console.log("left pos"+car.offsetLeft)
+            // console.log("top pos"+car.offsetTop)
+
+            
+            
+            //creating enemy cars
+            for(i=0;i<4;i++)
+            {
+                    let enemycar=document.createElement('div')
+                    enemycar.setAttribute('class','enemy')
+                    enemycar.y=((i+1)*350)*-1
+                    enemycar.style.top=(i*150)+"px"
+                    enemycar.style.backgroundColor=randomcolor()
+                    enemycar.style.left=Math.floor(Math.random()*350)+"px"
+                    gamearea.appendChild(enemycar)
+            }
+        }
+        function randomcolor(){
+            function c(){
+                let hex=Math.floor(Math.random()*256).toString(16);//to convert number to hexadecimal use tostring
+                return ("0"+String(hex)).substr(-2)
+            }
+            return "#"+c()+c()+c()
+        }
+
+
+    </script>
+</body>
+</html>
+
+
+<!-- road mapping x=left se road kitni aur y =0 maens upr se koi jgh nhi iske le -->
+<!--requestAnimationFrame means hm ek fxn k andr multiple times loop chla skte  -->
